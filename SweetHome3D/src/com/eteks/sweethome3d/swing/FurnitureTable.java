@@ -731,6 +731,32 @@ public class FurnitureTable extends JTable implements View, Printable {
     // with printable renderers for each column
     DefaultTableColumnModel printableColumnModel = new DefaultTableColumnModel();
     TableColumnModel columnModel = getColumnModel();
+
+    List<TableColumn> columnsToPrint = new ArrayList<TableColumn>();
+    boolean hasLevelColumn = false;
+
+    // Copy all currently visible columns
+    for (int i = 0; i < columnModel.getColumnCount(); i++) {
+      TableColumn column = columnModel.getColumn(i);
+      columnsToPrint.add(column);
+
+      if (column.getIdentifier()
+              == HomePieceOfFurniture.SortableProperty.LEVEL) {
+        hasLevelColumn = true;
+      }
+    }
+
+    // Add Level if it is not already visible
+    if (!hasLevelColumn) {
+      FurnitureTableColumnModel furnitureColumns =
+              (FurnitureTableColumnModel) columnModel;
+
+      TableColumn levelColumn = furnitureColumns.availableColumns.get(
+              HomePieceOfFurniture.SortableProperty.LEVEL);
+
+      columnsToPrint.add(levelColumn);
+    }
+
     final DefaultTableCellRenderer defaultRenderer = new DefaultTableCellRenderer();
     defaultRenderer.setHorizontalAlignment(DefaultTableCellRenderer.CENTER);
     TableCellRenderer printableHeaderRenderer = new TableCellRenderer() {
@@ -750,8 +776,7 @@ public class FurnitureTable extends JTable implements View, Printable {
           return headerRendererLabel;
         }
       };
-    for (int columnIndex = 0, n = columnModel.getColumnCount(); columnIndex < n; columnIndex++) {
-      final TableColumn tableColumn = columnModel.getColumn(columnIndex);
+    for (final TableColumn tableColumn : columnsToPrint) {
       // Create a printable column from existing table column
       TableColumn printableColumn = new TableColumn();
       printableColumn.setIdentifier(tableColumn.getIdentifier());
